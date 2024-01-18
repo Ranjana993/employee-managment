@@ -4,12 +4,12 @@
     const data = await fetch("./src/data.json")
     const res = await data.json();
     // console.log(res);
-    const employees = res;
+    let employees = res;
     let selectedEmployeesId = employees[0].id
     let selectedEmployeesInfo = employees[0]
 
-    const employeesList = document.querySelector(".data_container")
-    const employeesListInfo = document.querySelector(".data_of_single")
+    let employeesList = document.querySelector(".data_container")
+    let employeesListInfo = document.querySelector(".data_of_single")
 
     employeesList.addEventListener("click", (e) => {
         if (e.target.tagName === 'SPAN' && selectedEmployeesId !== e.target.id) {
@@ -17,7 +17,19 @@
             renderList()
             renderEmployeesData()
         }
-
+        // !Employee Delete Logic - START
+        if (e.target.tagName === "I") {
+            employees = employees.filter(
+                (emp) => String(emp.id) !== e.target.parentNode.id
+            );
+            if (String(selectedEmployeesId) === e.target.parentNode.id) {
+                selectedEmployeesId = employees[0]?.id || -1;
+                selectedEmployeesInfo = employees[0] || {};
+                renderEmployeesData();
+            }
+            renderList();
+        }
+        //! Employee Delete Logic - END
     })
     //! add employees 
     const createEmployee = document.querySelector(".createEmployees")
@@ -32,14 +44,14 @@
             addEmployees.style.display = "none"
         }
     })
-    addEmployeesForm.addEventListener("submit" , (e)=>{
+    addEmployeesForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const formdata = new FormData(addEmployeesForm);
         const value = [...formdata.entries()]
         console.log(value);
         let empData = {};
-        value.forEach((val)=>{
-            empData[val[0]]=val[1];
+        value.forEach((val) => {
+            empData[val[0]] = val[1];
         });
         empData.id = employees[employees.length - 1].id + 1;
         empData.age = new Date().getFullYear() - parseInt(empData.dob.slice(0, 4), 10);
@@ -50,10 +62,6 @@
         addEmployeesForm.reset();
         addEmployees.style.display = "none";
     })
-    // ! seletor employees 
-
-    // !   delete employees 
-
 
     // ! render employee list 
     const renderList = async () => {
@@ -73,8 +81,13 @@
     renderList();
     // ! render employee information 
     const renderEmployeesData = () => {
-
-        employeesListInfo.innerHTML = `
+        // Employee Delete Logic - START
+        if (selectedEmployeesId === -1) {
+            employeesListInfo.innerHTML = "";
+            return;
+        } else {
+            // Employee Delete Logic - END
+            employeesListInfo.innerHTML = `
         <img src="${selectedEmployeesInfo.imageUrl}" />
         <span class="employees__single--heading">
         ${selectedEmployeesInfo.firstName} ${selectedEmployeesInfo.lastName} (${selectedEmployeesInfo.age})
@@ -82,8 +95,8 @@
         <span>${selectedEmployeesInfo.address}</span>
         <span>${selectedEmployeesInfo.email}</span>
         <span>Mobile - ${selectedEmployeesInfo.contactNumber}</span>
-        <span>DOB - ${selectedEmployeesInfo.dob}</span>
-    `;
+        <span>DOB - ${selectedEmployeesInfo.dob}</span>`;
+        }
     };
 
     if (selectedEmployeesInfo) renderEmployeesData();
